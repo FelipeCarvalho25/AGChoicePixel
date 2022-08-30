@@ -25,15 +25,14 @@ function iniciar(){
 		{
 			var score = 0
 			score = batimetria.startBatimetria(population[i].gene)
-			//print(population[i].gene)
+			
 			//print(score)
 			var ind = population[i] 
 			ind.score = score
-			sumScore += score
 			population[i] = ind
-			print(i)
+			sumScore = ee.Number(sumScore).add(score)
+			
 		}
-		sleep(100)
 		gerNewPopulation();
 		numGerations++
 		print(numGerations)
@@ -118,9 +117,10 @@ function gerNewPopulation(){
 	var qtdMut = 0
 	var qtdRep = 0
 	var aPais = []
+	var niter = 2
 	newPopulation.push(population[0])
 	newPopulation.push(population[1])
-	while(ee.List(newPopulation).size() < tamPopulation){		
+	while(niter < tamPopulation){		
 		var ran = getRandomArbitrary(0, 1) 
 		if (ran < 0.5){
 			aPais = selecaoRoleta()
@@ -131,19 +131,21 @@ function gerNewPopulation(){
 		ran = getRandomArbitrary(0, 1)
 		if(ran < 0.5 && qtdMut < qtdIndMut){			
 			var aMutados = fazerMutacao(aPais)
-			population.push(aMutados[0])
-			population.push(aMutados[1])
-			qtdMut+=2
+			newPopulation.push(aMutados[0])
+			newPopulation.push(aMutados[1])
+			qtdMut = ee.Number(qtdMut).add(2)
 		}
 		else{
 			var aFilhos = crossover(aPais)
-			for(var k = 0; k < len(aFilhos); k++){
-				population.push(aFilhos[k])
+			for(var k = 0; k < ee.List(aFilhos).size(); k++){
+				newPopulation.push(aFilhos[k])
 			}
-			qtdRep+=len(aFilhos)
+			qtdRep = ee.Number(qtdRep).add(ee.List(aFilhos).size())
 		}
 		shuffleArray()
+		niter =  ee.Number(niter).add(1)
 	}
+	print(newPopulation)
 	population = newPopulation
 }
 
@@ -211,7 +213,7 @@ function selecaoRoleta(){
 		var perPos = population[i].score/sumScore;
 		qtdPosicoes = ee.Number(ee.List(roleta).size() * perPos);
 		for(var j = 0; j <  qtdPosicoes; j++){
-			var ran = getRandomArbitrary(0, len(roleta)-1) 
+			var ran = getRandomArbitrary(0, ee.List(roleta).size()-1) 
 			while (roleta[ran] != -1){
 				ran = getRandomArbitrary(0, ee.List(roleta).size()-1) 
 			}
